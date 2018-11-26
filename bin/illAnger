@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+
+require File.join(File.expand_path('..', __dir__), '/app/ill_anger.rb')
+
+ill_anger = IllAnger.new
+options = {}
+
+OptionParser.new do |parser|
+
+  parser.on("-a", "--scan-all", "Processes all media") do ||
+    options[:movies] = true
+    options[:series] = true
+  end
+
+  parser.on("-m", "--scan-movies", "Processes movies") do ||
+    options[:movies] = true
+  end
+
+  parser.on("-s", "--scan-series", "Processes series") do ||
+    options[:series] = true
+  end
+
+end.parse!
+
+
+ill_anger.process_movies if options[:movies]

@@ -1,0 +1,9 @@
+require './app/ill_anger'
+
+task default: %w[hello]
+
+task :hello do
+  p IllAnger
+puts "Hello world!"
+  IllAnger.new
+end
