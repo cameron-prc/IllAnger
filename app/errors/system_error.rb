@@ -1,6 +1,6 @@
 module IllAnger
   module Errors
-    class InvalidMediaSource < SystemError
+    class SystemError < StandardError
     end
   end
 end
