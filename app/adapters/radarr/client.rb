@@ -27,9 +27,14 @@ module IllAnger
           http = Net::HTTP.new(uri.host, uri.port)
 
           request = Net::HTTP::Get.new(uri.request_uri)
-          response = http.request(request)
 
-          { error: !(response.kind_of? Net::HTTPSuccess), message: response.body }
+          response = begin
+            http.request(request)
+          rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => e
+            IllAnger::LOGGER.error "Unable to connect to Radarr server: #{e.class}"
+          end
+
+          { error: !(response.kind_of? Net::HTTPSuccess) }
 
         end
 

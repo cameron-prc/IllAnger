@@ -20,9 +20,6 @@ module IllAnger
 
           @connected = (not system_status[:error])
 
-          if system_status[:error]
-            IllAnger::LOGGER.warn "Unable to communicate with the radarr server"
-          end
         end
 
         def add_to_wanted movie

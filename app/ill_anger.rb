@@ -7,6 +7,7 @@ Dir['./core/*.rb'].each { |file| require file }
 Dir['./processors/*.rb'].each { |file| require file }
 Dir['./services/*.rb'].each { |file| require file }
 Dir['./adapters/*.rb'].each { |file| require file }
+Dir['./errors/*.rb'].each { |file| require file }
 
 module IllAnger
 
@@ -20,3 +21,5 @@ module IllAnger
   end
 
 end
+
+IllAnger.new

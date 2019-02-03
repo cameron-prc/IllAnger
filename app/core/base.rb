@@ -33,10 +33,10 @@ module IllAnger
 
       begin
         @movie_processor = IllAnger::Processors.const_get(processor).new
-      rescue Errors::ProcessorInitialisationFailure => error
-        IllAnger::LOGGER.error "Unable to load system processor"
+      rescue IllAnger::Errors::ProcessorInitialisationFailure => error
+        IllAnger::LOGGER.error "Unable to load system processor: #{error.class}"
         IllAnger::LOGGER.error "Exiting..."
-
+        
         exit 1
       end
     end

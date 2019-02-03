@@ -9,7 +9,7 @@ module IllAnger
         unless @adapter.connected
           IllAnger::LOGGER.error "Unable to initialise Radarr processor"
 
-          throw new IllAnger::Errors::ProcessorInitialisationFailure
+          raise IllAnger::Errors::ProcessorInitialisationFailure
         end
       end
 
