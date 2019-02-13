@@ -23,6 +23,7 @@ module IllAnger
         end
 
         def add_to_wanted movie
+
           IllAnger::LOGGER.debug "Adding #{movie[:title]} (#{movie[:year]}) to wanted list"
 
           # Get id from TMDB
@@ -45,44 +46,42 @@ module IllAnger
               rootFolderPath: @config[:movies]['root_dir']
           }
 
+          # Both the tmdb id and an image url are required for radarr
           if tmdb_Id and image_url
+
             response = @client.post("/movie", params)
 
-            p response
-            p response[:error]
 
             if response[:error]
-              message = JSON.parse response[:message], {:symbolize_names => true}
 
-              IllAnger::LOGGER.warn "Unable to add #{movie[:title]} (#{movie[:year]}) to wanted list:"
-              IllAnger::LOGGER.warn "\t#{message[0][:errorMessage]}"
-            else
-              IllAnger::LOGGER.info "#{movie[:title]} (#{movie[:year]}) added to wanted list"
+              raise new Errors::ExternalCommunicationFailure "Unable to add #{movie[:title]} (#{movie[:year]}) to wanted list: #{response[:message]}"
+
             end
-          else
-            IllAnger::LOGGER.warn "Unable to add #{movie[:title]} (#{movie[:year]}) to wanted list:"
-            IllAnger::LOGGER.warn "\tUnable to find imdbid or image url"
-            IllAnger::LOGGER.warn "\tTMDB id: #{tmdb_Id || 'nil'}"
-            IllAnger::LOGGER.warn "\tImage url: #{image_url || 'nil'}"
 
-            { error: true, message: "Unable to load movie info" }
+          else
+
+            raise new Errors::ExternalCommunicationFailure "Unable to add #{movie[:title]} (#{movie[:year]}) to wanted list: Unable to find tmdb id (#{tmdb_Id || 'nil'}) or image url (#{image_url || 'nil'})"
+
           end
+
         end
 
         def get_known_movies
+
           IllAnger::LOGGER.debug "Getting known movie list"
 
           response = @client.get('/movie')
 
           if response[:error]
-            IllAnger::LOGGER.warn "Failed to retrieve known movie list"
-            IllAnger::LOGGER.warn response[:message]
 
-            Array.new
+            raise Errors::ExternalCommunicationFailure "Failed to retrieve known movie list: #{response[:message]}"
+
           else
+
             IllAnger::LOGGER.debug "Known movie list retrieved"
 
-            response[:message]
+            response[:data]
+
           end
         end
       end

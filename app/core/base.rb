@@ -1,44 +1,45 @@
 
 
-
+# Remove dependancy on services.
+#
+#  Should error if no valid services are found however run if at least one is
+#
 module IllAnger
   class Base
 
     attr_reader :config
 
     def initialize
+
+      # noinspection RubyResolve
       @config = IniFile.load(File.join(IllAnger::CONFIG_DIR, 'illAnger.ini'))
-      @movies_config = IniFile.load(File.join(IllAnger::CONFIG_DIR, 'movies.ini'))
 
       IllAnger::LOGGER.level = Logger.const_get(@config[:logging]['level'])
 
-      set_movie_processor(@config[:processors]["movies"])
     end
 
-    def process_movies(sources = :default)
+    def process
 
-      IllAnger::LOGGER.debug "Processing movies"
+      media_finder = MediaFinder.new
 
-      movies = Services::MovieFinder.new(sources, @movies_config).find_movies
+      @config[:media_types].each do |media_type, active|
 
-      @movie_processor.process movies
+        next unless active == 1
 
-    end
+        if media_finder.load_service(media_type)
 
-    private
+          media_finder.process
 
-    def set_movie_processor(processor)
+        elsif
 
-      IllAnger::LOGGER.debug "Setting application processor to #{processor}"
+          IllAnger::LOGGER.warn "Cancelling #{media_type} run"
 
-      begin
-        @movie_processor = IllAnger::Processors.const_get(processor).new
-      rescue IllAnger::Errors::ProcessorInitialisationFailure => error
-        IllAnger::LOGGER.error "Unable to load system processor: #{error.class}"
-        IllAnger::LOGGER.error "Exiting..."
-        
-        exit 1
+        end
+
       end
+
     end
+
   end
+  
 end

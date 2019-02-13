@@ -38,7 +38,7 @@ module IllAnger
 
               parser = Imdb.const_get("#{parser_type}Parser").new
 
-              html = open(url)
+              html = open(url, {'Accept-Language' => 'en'})
 
               new_data = parser.parse html
 

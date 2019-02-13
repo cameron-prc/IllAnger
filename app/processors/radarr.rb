@@ -7,35 +7,83 @@ module IllAnger
         @adapter = IllAnger::Adapters::Radarr.new
 
         unless @adapter.connected
+
           IllAnger::LOGGER.error "Unable to initialise Radarr processor"
 
-          raise IllAnger::Errors::ProcessorInitialisationFailure
+          raise IllAnger::Errors::InitializationFailure "Unable to initialise Radarr processor"
+
         end
       end
 
       def process(movies)
 
+        movies_added = 0
+        additions_failed = 0
+
+
         # Update the list of known movies to reduce duplicate movie requests
-        refresh_known_movie_list
+
+        begin
+
+          refresh_known_movie_list
+
+        rescue Errors::ExternalCommunicationFailure => error
+
+          IllAnger::LOGGER.warn "Cancelling movie processing: #{error.message}"
+
+          raise
+
+        end
+
+        IllAnger::LOGGER.debug "#{@known_movies.length} existing movies found"
+
 
         movies.each do |movie|
-          @adapter.add_to_wanted movie unless movie_exists? movie
+
+          IllAnger::LOGGER.debug "Processing #{movie}"
+
+          unless movie_exists? movie
+
+            begin
+
+              @adapter.add_to_wanted(movie)
+
+              movies_added += 1
+
+              IllAnger::LOGGER.debug "#{movie} has been added to Radarr"
+
+            rescue Errors::ExternalCommunicationFailure => error
+
+              IllAnger::LOGGER.info error.message
+
+              additions_failed += 1
+
+            end
+
+          end
+
         end
+
+        IllAnger::LOGGER.info "Movie processing successful. #{movies_added} movies added, #{additions_failed} movies failed to add, #{movies.length - movies_added - additions_failed} movies skipped"
+
       end
 
       private
 
-      # TODO: store movies locally here
       def refresh_known_movie_list
+
         begin
+
           @known_movies = @adapter.get_known_movies
-        rescue Exception => e
 
-          IllAnger::LOGGER.warn "Unable to fetch known movie list"
-          IllAnger::LOGGER.warn e
+        rescue Errors::ExternalCommunicationFailure => error
 
-          exit 1
+          IllAnger::LOGGER.warn "Unable to fetch known movie list: #{error.message}"
+
+          raise
+
         end
+
       end
 
       #

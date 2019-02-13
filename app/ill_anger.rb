@@ -3,6 +3,8 @@ Dir.chdir __dir__
 require 'inifile'
 require 'logger'
 
+require './system_error'
+
 Dir['./core/*.rb'].each { |file| require file }
 Dir['./processors/*.rb'].each { |file| require file }
 Dir['./services/*.rb'].each { |file| require file }
@@ -22,4 +24,4 @@ module IllAnger
 
 end
 
-IllAnger.new
+IllAnger.new.process#_movies

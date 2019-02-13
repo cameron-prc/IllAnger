@@ -4,12 +4,10 @@ module IllAnger
   module Services
     module Movies
       module Imdb
-        #
+
         # Parses a standard IMDB list
-        #
         class MovieListParser
 
-          #
           # Takes an html page and strips out the movie information
           def parse(html)
             media_list = []
@@ -27,10 +25,6 @@ module IllAnger
             end
 
             media_list
-          end
-
-          def self.parse
-
           end
         end
       end

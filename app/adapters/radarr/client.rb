@@ -25,7 +25,6 @@ module IllAnger
 
           uri = uri_builder('/system/status')
           http = Net::HTTP.new(uri.host, uri.port)
-
           request = Net::HTTP::Get.new(uri.request_uri)
 
           response = begin
@@ -42,14 +41,24 @@ module IllAnger
 
           uri = uri_builder(url)
           http = Net::HTTP.new(uri.host, uri.port)
-
           request = Net::HTTP::Post.new(uri.request_uri, 'Content-Type' => 'application/json')
           request.body = params.to_json
 
           response = http.request(request)
 
 
-          { error: !(response.kind_of? Net::HTTPSuccess), message: response.body }
+          if response.kind_of? Net::HTTPSuccess
+
+            { error: false, code: response.code }
+
+          else
+
+            data = JSON.parse(response.body, {:symbolize_names => true})[0]
+
+            { error: true, code: response.code, message: data[:errorMessage] }
+
+          end
+
 
         end
 
@@ -63,13 +72,26 @@ module IllAnger
 
           data = JSON.parse response.body, {:symbolize_names => true}
 
-          { error: !(response.kind_of? Net::HTTPSuccess), message: (response.kind_of? Net::HTTPSuccess) ? data : response.body }
+          if response.kind_of? Net::HTTPSuccess
+
+            { error: false, code: response.code, data: data }
+
+          else
+
+            { error: true, code: response.code, message: data[0][:errorMessage] }
+
+          end
+
         end
 
         private
 
         def uri_builder(url)
           URI.parse("#{@root_url}#{url}#{@api_auth_query_string}")
+        end
+
+        def construct_error_message(code)
+          "Radarr server returned a #{code} response"
         end
 
       end
