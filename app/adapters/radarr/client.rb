@@ -29,11 +29,13 @@ module IllAnger
 
           response = begin
             http.request(request)
-          rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => e
-            IllAnger::LOGGER.error "Unable to connect to Radarr server: #{e.class}"
+          rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError, SocketError => e
+
+            raise Errors::ExternalCommunicationFailure.new "Unable to connect to Radarr server: #{e.message} (#{e.class})"
+
           end
 
-          { error: !(response.kind_of? Net::HTTPSuccess) }
+          response
 
         end
 

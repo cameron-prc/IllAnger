@@ -16,9 +16,9 @@ module IllAnger
 
         @service = Services::const_get("#{service_name.capitalize}Finder").new
 
-      rescue NameError
+      rescue NameError => er
 
-        IllAnger::LOGGER.warn "Unable to load finder service: #{service_name}"
+        IllAnger::LOGGER.warn "Unable to load #{service_name} finder service"
 
         @service = nil
 

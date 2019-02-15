@@ -1,6 +1,6 @@
 module IllAnger
   module Errors
-    class InitializationFailure < SystemError
+    class InitialisationFailure < SystemError
     end
   end
 end

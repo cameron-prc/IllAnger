@@ -3,16 +3,22 @@ module IllAnger
     class Radarr
 
       def initialize
-        @known_movies = []
-        @adapter = IllAnger::Adapters::Radarr.new
 
-        unless @adapter.connected
+        @known_movies = Array.new
 
-          IllAnger::LOGGER.error "Unable to initialise Radarr processor"
+        begin
 
-          raise IllAnger::Errors::InitializationFailure "Unable to initialise Radarr processor"
+          @adapter = IllAnger::Adapters::Radarr.new
+
+        rescue StandardError => er
+
+          p er
+
+          raise IllAnger::Errors::InitialisationFailure.new "Unable to initialise Radarr processor"
 
         end
+
+
       end
 
       def process(movies)

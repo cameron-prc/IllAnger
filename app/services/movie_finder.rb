@@ -17,9 +17,11 @@ module IllAnger
           validate_sources
           set_movie_processor(processor == :default ? @config[:main]['processor'] : processor)
 
-        rescue Errors::SystemError
+        rescue Errors::SystemError => e
 
-          raise Errors::InitializationError "Movie finder failed to initialize"
+          p e
+
+          raise Errors::InitialisationFailure.new "Movie finder failed to initialize"
 
         end
 
@@ -35,7 +37,7 @@ module IllAnger
 
         rescue IllAnger::Errors::SystemError => error
 
-          raise IllAnger::Errors::ProcessingFailure "Failed to process movies: #{error.class}"
+          raise IllAnger::Errors::ProcessingFailure.new "Failed to process movies: #{error.class}"
 
         end
 
@@ -99,7 +101,7 @@ module IllAnger
 
         end
 
-        raise IllAnger::Errors::InsufficientMediaSources if @sources.length < 1
+        raise IllAnger::Errors::InsufficientMediaSources.new if @sources.length < 1
 
       end
 
@@ -132,8 +134,9 @@ module IllAnger
         rescue NameError, IllAnger::Errors::SystemError => error
 
           IllAnger::LOGGER.warn "Unable to load system processor: #{error.message}"
+          IllAnger::LOGGER.warn "Unable to load system processor: #{error.message}"
 
-          raise IllAnger::Errors::InitializationFailure error.message
+          raise IllAnger::Errors::InitialisationFailure.new error.message
 
         end
 

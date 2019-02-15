@@ -8,17 +8,31 @@ module IllAnger
 
       class Base
 
-        attr_accessor :connected
-
         def initialize
           IllAnger::LOGGER.debug "Initialising Radarr adapter"
 
           @config = IniFile.load(File.join(IllAnger::CONFIG_DIR, "radarr.ini"))
           @client = Radarr::Client.new
 
-          system_status = @client.check_system_status # Ensure that a connection to the server can be made
+          begin
 
-          @connected = (not system_status[:error])
+            system_status = @client.check_system_status # Ensure that a connection to the server can be made
+
+            p system_status
+
+          rescue Errors::SystemError => error
+
+            p "in catch"
+
+            IllAnger::LOGGER.warn error.message
+            IllAnger::LOGGER.warn error.message
+
+            raise Errors::InitialisationFailure.new "Failed to initialize Radarr adapter"
+
+          end
+
+
+
 
         end
 
@@ -54,13 +68,13 @@ module IllAnger
 
             if response[:error]
 
-              raise new Errors::ExternalCommunicationFailure "Unable to add #{movie[:title]} (#{movie[:year]}) to wanted list: #{response[:message]}"
+              raise Errors::ExternalCommunicationFailure.new "Unable to add #{movie[:title]} (#{movie[:year]}) to wanted list: #{response[:message]}"
 
             end
 
           else
 
-            raise new Errors::ExternalCommunicationFailure "Unable to add #{movie[:title]} (#{movie[:year]}) to wanted list: Unable to find tmdb id (#{tmdb_Id || 'nil'}) or image url (#{image_url || 'nil'})"
+            raise Errors::ExternalCommunicationFailure.new "Unable to add #{movie[:title]} (#{movie[:year]}) to wanted list: Unable to find tmdb id (#{tmdb_Id || 'nil'}) or image url (#{image_url || 'nil'})"
 
           end
 
@@ -74,7 +88,7 @@ module IllAnger
 
           if response[:error]
 
-            raise Errors::ExternalCommunicationFailure "Failed to retrieve known movie list: #{response[:message]}"
+            raise Errors::ExternalCommunicationFailure.new "Failed to retrieve known movie list: #{response[:message]}"
 
           else
 
